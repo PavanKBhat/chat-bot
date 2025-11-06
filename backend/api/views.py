@@ -1,53 +1,71 @@
-import json
-import requests
-import os
-from dotenv import load_dotenv
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Conversation, Message
+from .serializers import ConversationSerializer, MessageSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def conversations_view(request):
+    if request.method == 'GET':
+        conversations = Conversation.objects.filter(user=request.user).order_by('-created_at')
+        serializer = ConversationSerializer(conversations, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        title = request.data.get("title", "New Chat")
+        conversation = Conversation.objects.create(title=title, user=request.user)
+        serializer = ConversationSerializer(conversation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-@csrf_exempt
-def ask_gemini(request):
-    load_dotenv()
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
 
-            question = (
-                data.get("contents", [{}])[0]
-                .get("parts", [{}])[0]
-                .get("text", "")
-            )
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_message(request, pk):
+    try:
+        conversation = Conversation.objects.get(pk=pk, user=request.user)
+    except Conversation.DoesNotExist:
+        return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            if not question:
-                return JsonResponse({"error": "Missing 'question' text in request"}, status=400)
-            
-            api_key = os.getenv("GOOGLE_API_KEY")
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-            headers = {"Content-Type": "application/json"}
+    sender = request.user.username
+    content = request.data.get("content")
 
-            payload = {
-                "contents": [
-                    {
-                        "role": "user",
-                        "parts": [{"text": question}]
-                    }
-                ]
-            }
+    if not content:
+        return Response({"error": "Message content is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-            response = requests.post(url, headers=headers, json=payload)
-            data = response.json()
+    # ✅ Save only the user message
+    user_msg = Message.objects.create(
+        conversation=conversation,
+        sender=sender,
+        content=content
+    )
 
-            answer = (
-                data.get("candidates", [{}])[0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")
-            )
+    # ✅ Create static AI response (not saved in DB)
+    ai_response = f"🤖 Static response: You said '{content}'. (AI reply coming soon!)"
 
-            return JsonResponse({"answer": answer})
+    # ✅ Return both (one saved, one generated)
+    response_data = {
+        "user_message": MessageSerializer(user_msg).data,
+        "ai_response": {
+            "sender": "AI Bot",
+            "content": ai_response
+        }
+    }
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+    return Response(response_data, status=status.HTTP_201_CREATED)
 
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_conversations(request):
+    """
+    Returns all past conversations for the logged-in user, ordered by creation date.
+    """
+    conversations = Conversation.objects.filter(user=request.user).order_by('-created_at')
+    serializer = ConversationSerializer(conversations, many=True)
+    return Response(serializer.data)

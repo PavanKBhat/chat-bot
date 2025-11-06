@@ -1,35 +1,40 @@
-import { Conversation, Message } from "../types";
+import axios from "axios";
 
-const BASE_URL = "http://localhost:8000/api";
+const API_URL = "http://127.0.0.1:8000/api/";
+const token = localStorage.getItem("token");
 
-export async function getConversations(): Promise<Conversation[]> {
-  const res = await fetch(`${BASE_URL}/conversations/`);
-  const data = await res.json();
-  return data.results || data;
-}
 
-export async function getConversation(id: number): Promise<Conversation> {
-  const res = await fetch(`${BASE_URL}/conversations/${id}/`);
-  return res.json();
-}
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: token ? `Bearer ${token}` : "",
+  },
+});
 
-export async function createConversation(title = "New Chat"): Promise<Conversation> {
-  const res = await fetch(`${BASE_URL}/conversations/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title }),
-  });
-  return res.json();
-}
 
-export async function addMessage(
-  conversationId: number,
-  data: { sender: string; content: string }
-): Promise<Message> {
-  const res = await fetch(`${BASE_URL}/conversations/${conversationId}/messages/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return res.json();
-}
+export const createConversation = async (title = "New Chat") => {
+  const res = await axiosInstance.post("conversations/", { title });
+  return res.data;
+};
+
+
+export const getConversations = async () => {
+  const res = await axiosInstance.get("conversations/");
+  return res.data;
+};
+
+
+export const getConversation = async (id: number) => {
+  const res = await axiosInstance.get(`conversations/${id}/`);
+  return res.data;
+};
+
+
+export const addMessage = async (
+  id: number,
+  message: { sender: string; content: string }
+) => {
+  const res = await axiosInstance.post(`conversations/${id}/messages/`, message);
+  return res.data;
+};

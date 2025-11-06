@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getConversation, addMessage, createConversation } from "../api/chatApi";
-import { Conversation } from "../types";
+import { Conversation, Message } from "../types";
 
 interface ChatWindowProps {
   conversationId: number | null;
@@ -11,14 +11,18 @@ interface ChatWindowProps {
 export default function ChatWindow({ conversationId, user, onNewConversation }: ChatWindowProps) {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [msg, setMsg] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]); // local live messages
+  const [loading, setLoading] = useState(false);
 
   const loadConversation = async () => {
     if (!conversationId) {
       setConversation(null);
+      setMessages([]);
       return;
     }
     const data = await getConversation(conversationId);
     setConversation(data);
+    setMessages(data.messages);
   };
 
   useEffect(() => {
@@ -28,25 +32,55 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
   const sendMessage = async () => {
     if (!msg.trim()) return;
 
+    const userMessage: Message = {
+      id: Date.now(), // temporary id
+      sender: user,
+      content: msg,
+    };
+
+    // Show message instantly
+    setMessages((prev) => [...prev, userMessage]);
+    setMsg("");
+
     let conv = conversation;
 
     if (!conversationId) {
-      conv = await createConversation(msg.slice(0, 40));
-      if (onNewConversation) onNewConversation(conv.id);
-      setConversation(conv);
+      const newConv = await createConversation(msg.slice(0, 40));
+      if (onNewConversation) onNewConversation(newConv.id);
+      setConversation(newConv);
+      conv = newConv;
     }
 
-    await addMessage(conv!.id, { sender: user, content: msg });
-    setMsg("");
-    loadConversation();
+    if (!conv) return;
+
+    // Save user message to backend
+    await addMessage(conv.id, { sender: user, content: msg });
+
+    // Simulate bot response (for now static)
+    setLoading(true);
+    setTimeout(async () => {
+      const botResponse = "This is a static response from your backend (mock AI 🤖)";
+      const botMessage: Message = {
+        id: Date.now() + 1,
+        sender: "bot",
+        content: botResponse,
+      };
+
+      // Show bot response in UI
+      setMessages((prev) => [...prev, botMessage]);
+
+      // Save bot message to backend
+      await addMessage(conv!.id, { sender: "bot", content: botResponse });
+      setLoading(false);
+    }, 700); // small delay to look natural
   };
 
   return (
     <div className="flex flex-col flex-1 bg-gray-50">
-      {/* Messages or Intro Section */}
+      {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto">
-        {conversation && conversation.messages.length > 0 ? (
-          conversation.messages.map((m) => (
+        {messages.length > 0 ? (
+          messages.map((m) => (
             <div key={m.id} className={`mb-3 ${m.sender === user ? "text-right" : "text-left"}`}>
               <div
                 className={`inline-block px-3 py-2 rounded-lg ${
@@ -62,16 +96,24 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
             <h2 className="text-2xl font-semibold mb-4"> Chat Bot </h2>
             <div className="bg-white shadow-md rounded-xl p-6 w-full max-w-lg text-left text-gray-700">
               <ul className="list-disc list-inside space-y-2">
-                <li>Built using <strong>Django REST Framework</strong> & <strong>React</strong> <strong>, Tailwind</strong></li>
-                <li>Real-time chat experience powered by <strong>Gemini API</strong></li>
-                <li>All conversations stored securely in <strong>PostgreSQL</strong></li>
-                <li>Authentication managed via <strong>JWT tokens</strong></li>
-                <li>Designed for the <strong>Full Stack Developer Assignment</strong></li>
+                <li>
+                  Built using <strong>Django REST Framework</strong> & <strong>React</strong> + <strong>Tailwind</strong>
+                </li>
+                <li>Real-time chat experience powered by <strong>Gemini API</strong> (mocked)</li>
+                <li>Conversations stored securely in <strong>PostgreSQL</strong></li>
+                <li>Auth handled via <strong>JWT tokens</strong></li>
               </ul>
             </div>
-            <p className="mt-6 text-gray-400 text-sm italic">
+            <p className="mt-6 text-gray-400 text-sm italic animate-typing overflow-hidden whitespace-nowrap border-r-2 border-gray-400 pr-2">
               Start chatting by typing below 👇
             </p>
+          </div>
+        )}
+        {loading && (
+          <div className="text-left">
+            <div className="inline-block px-3 py-2 rounded-lg bg-gray-200 text-gray-500 italic animate-pulse">
+              Bot is typing...
+            </div>
           </div>
         )}
       </div>
@@ -82,15 +124,15 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
           type="text"
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
-          placeholder="Type your message..."
-          className="border flex-1 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          placeholder="Type your query..."
+          className="border flex-1 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-white"
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button
           onClick={sendMessage}
-          disabled={!msg.trim()}
+          disabled={!msg.trim() || loading}
           className={`px-4 rounded text-white transition ${
-            msg.trim()
+            msg.trim() && !loading
               ? "bg-blue-600 hover:bg-blue-700"
               : "bg-gray-400 cursor-not-allowed"
           }`}
