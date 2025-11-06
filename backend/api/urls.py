@@ -3,4 +3,5 @@ from .views import ask_gemini
 
 urlpatterns = [
     path("ask/", ask_gemini),
+    
 ]
