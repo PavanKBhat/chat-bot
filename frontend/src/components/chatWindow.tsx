@@ -11,7 +11,7 @@ interface ChatWindowProps {
 export default function ChatWindow({ conversationId, user, onNewConversation }: ChatWindowProps) {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [msg, setMsg] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]); // local live messages
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadConversation = async () => {
@@ -33,12 +33,12 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
     if (!msg.trim()) return;
 
     const userMessage: Message = {
-      id: Date.now(), // temporary id
+      id: Date.now(), 
       sender: user,
       content: msg,
     };
 
-    // Show message instantly
+   
     setMessages((prev) => [...prev, userMessage]);
     setMsg("");
 
@@ -53,10 +53,8 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
 
     if (!conv) return;
 
-    // Save user message to backend
     await addMessage(conv.id, { sender: user, content: msg });
 
-    // Simulate bot response (for now static)
     setLoading(true);
     setTimeout(async () => {
       const botResponse = "This is a static response from your backend (mock AI 🤖)";
@@ -66,18 +64,15 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
         content: botResponse,
       };
 
-      // Show bot response in UI
       setMessages((prev) => [...prev, botMessage]);
 
-      // Save bot message to backend
       await addMessage(conv!.id, { sender: "bot", content: botResponse });
       setLoading(false);
-    }, 700); // small delay to look natural
+    }, 700); 
   };
 
   return (
     <div className="flex flex-col flex-1 bg-gray-50">
-      {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto">
         {messages.length > 0 ? (
           messages.map((m) => (
@@ -118,7 +113,6 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
         )}
       </div>
 
-      {/* Message Input */}
       <div className="p-3 border-t flex gap-2 bg-white">
         <input
           type="text"

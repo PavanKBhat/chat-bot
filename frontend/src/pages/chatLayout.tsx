@@ -1,26 +1,22 @@
 import { useState } from "react";
+import TopNav from "../components/topNav";
 import SideNav from "../components/sideNav";
-import ChatWindow from "../components/chatWindow";
+import ChatWindow from "../components/chatWindow"
+interface ChatLayoutProps {
+  user: string;
+  onLogout: () => void;
+  onLogin: () => void;
+}
 
-export default function ChatLayout() {
-  const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
-  const user = localStorage.getItem("username") || "User"; // example — adjust based on your auth setup
+export default function ChatLayout({ user, onLogout, onLogin }: ChatLayoutProps) {
+  const [selectedConv, setSelectedConv] = useState<number | null>(null);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <SideNav
-        activeId={activeConversationId}
-        onSelect={(id) => setActiveConversationId(id)} 
-      />
-
-      {/* Chat window */}
-      <div className="flex-1 flex flex-col">
-        <ChatWindow
-          conversationId={activeConversationId}
-          user={user}
-          onNewConversation={(id) => setActiveConversationId(id)} 
-        />
+    <div className="flex flex-col h-screen">
+      <TopNav user={user} onLogout={onLogout} onLogin={onLogin}/>
+      <div className="flex flex-1 overflow-hidden">
+        <SideNav onSelect={setSelectedConv} />
+        <ChatWindow conversationId={selectedConv} user={user} />
       </div>
     </div>
   );

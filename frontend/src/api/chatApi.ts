@@ -1,16 +1,26 @@
 import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/api/";
-const token = localStorage.getItem("token");
-
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
-    Authorization: token ? `Bearer ${token}` : "",
   },
 });
+
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token"); // always fetch the latest one
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+  return config;
+});
+
+export default axiosInstance;
+
 
 
 export const createConversation = async (title = "New Chat") => {

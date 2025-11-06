@@ -27,45 +27,58 @@ def conversations_view(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_message(request, pk):
+    """
+    Adds a new message (user or bot) to the conversation.
+    - If sender is 'bot', saves as 'ai-bot'
+    - Otherwise uses the logged-in user's username
+    - Automatically updates conversation title based on first user message
+    """
     try:
         conversation = Conversation.objects.get(pk=pk, user=request.user)
     except Conversation.DoesNotExist:
         return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    sender = request.user.username
+    sender_from_frontend = str(request.data.get("sender", "")).strip().lower()
     content = request.data.get("content")
 
     if not content:
         return Response({"error": "Message content is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ✅ Save only the user message
-    user_msg = Message.objects.create(
+    # Determine sender
+    if sender_from_frontend in ["bot", "ai-bot", "assistant"]:
+        sender = "ai-bot"
+    else:
+        sender = request.user.username
+
+    # ✅ Save the message
+    message = Message.objects.create(
         conversation=conversation,
         sender=sender,
         content=content
     )
 
-    # ✅ Create static AI response (not saved in DB)
-    ai_response = f"🤖 Static response: You said '{content}'. (AI reply coming soon!)"
+    # ✅ Automatically update title if it's still "New Conversation"
+    if conversation.title.lower() == "new conversation" and sender != "ai-bot":
+        short_title = content[:40].strip() + ("..." if len(content) > 40 else "")
+        conversation.title = short_title
+        conversation.save(update_fields=["title"])
 
-    # ✅ Return both (one saved, one generated)
-    response_data = {
-        "user_message": MessageSerializer(user_msg).data,
-        "ai_response": {
-            "sender": "AI Bot",
-            "content": ai_response
-        }
-    }
+    serializer = MessageSerializer(message)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_conversations(request):
+def get_conversations(request, pk):
     """
-    Returns all past conversations for the logged-in user, ordered by creation date.
+    Returns a single conversation and all its messages for the logged-in user.
     """
-    conversations = Conversation.objects.filter(user=request.user).order_by('-created_at')
-    serializer = ConversationSerializer(conversations, many=True)
+    try:
+        conversation = Conversation.objects.get(pk=pk, user=request.user)
+    except Conversation.DoesNotExist:
+        return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ConversationSerializer(conversation)
     return Response(serializer.data)
+
