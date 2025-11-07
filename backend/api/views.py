@@ -5,8 +5,13 @@ from rest_framework import status
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from django.contrib.auth import get_user_model
+import google.generativeai as genai
+from dotenv import load_dotenv
+from django.conf import settings
+
 
 User = get_user_model()
+load_dotenv()
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -23,50 +28,93 @@ def conversations_view(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+User = get_user_model()
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_message(request, pk):
     """
-    Adds a new message (user or bot) to the conversation.
-    - If sender is 'bot', saves as 'ai-bot'
-    - Otherwise uses the logged-in user's username
-    - Automatically updates conversation title based on first user message
+    Adds a new message to a conversation and generates an AI response using Gemini.
+    Includes full conversation context + summarized memory from user's past chats.
     """
     try:
         conversation = Conversation.objects.get(pk=pk, user=request.user)
     except Conversation.DoesNotExist:
         return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    content = request.data.get("content", "").strip()
     sender_from_frontend = str(request.data.get("sender", "")).strip().lower()
-    content = request.data.get("content")
 
     if not content:
         return Response({"error": "Message content is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Determine sender
-    if sender_from_frontend in ["bot", "ai-bot", "assistant"]:
-        sender = "ai-bot"
-    else:
-        sender = request.user.username
+    sender = "ai-bot" if sender_from_frontend in ["bot", "ai-bot", "assistant"] else request.user.username
 
-    # ✅ Save the message
-    message = Message.objects.create(
+    # Save user message
+    user_message = Message.objects.create(
         conversation=conversation,
         sender=sender,
         content=content
     )
 
-    # ✅ Automatically update title if it's still "New Conversation"
+    # Update conversation title if it's still default
     if conversation.title.lower() == "new conversation" and sender != "ai-bot":
         short_title = content[:40].strip() + ("..." if len(content) > 40 else "")
         conversation.title = short_title
         conversation.save(update_fields=["title"])
 
-    serializer = MessageSerializer(message)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # 🧠 1️⃣ Get current conversation context
+    current_history = conversation.messages.order_by("timestamp")[:10]
+    current_context = "\n".join([
+        f"{'User' if m.sender != 'ai-bot' else 'AI'}: {m.content}"
+        for m in current_history
+    ])
 
+    # 🧠 2️⃣ Summarize all other past conversations by the same user
+    other_convos = Conversation.objects.filter(user=request.user).exclude(id=conversation.id)
+    other_messages = Message.objects.filter(conversation__in=other_convos).order_by("timestamp")[:20]
+    other_context = "\n".join([
+        f"{'User' if m.sender != 'ai-bot' else 'AI'}: {m.content}"
+        for m in other_messages
+    ])
+    # 🧩 Combine both
+    full_prompt = (
+        "You are an intelligent AI assistant. "
+        "You can remember what the user discussed across multiple conversations.\n\n"
+        "Here is what the user and you have talked about in the past:\n"
+        f"{other_context}\n\n"
+        "Here is the current conversation:\n"
+        f"{current_context}\n\n"
+        f"User: {content}\nAI:"
+    )
 
+    # 🔮 Call Gemini
+    bot_reply = "⚠️ Unable to generate a response."
+    try:
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+
+        try:
+            model = genai.GenerativeModel("gemini-2.5-flash")
+        except Exception:
+            model = genai.GenerativeModel("gemini-1.5-flash")
+
+        response = model.generate_content(full_prompt)
+        bot_reply = (response.text or "").strip() or "🤖 (Empty Gemini response)"
+    except Exception as e:
+        logging.error(f"Gemini API error: {e}")
+        bot_reply = f"⚠️ Error communicating with Gemini: {e}"
+
+    # Save AI message
+    bot_message = Message.objects.create(
+        conversation=conversation,
+        sender="ai-bot",
+        content=bot_reply
+    )
+
+    return Response({
+        "user_message": MessageSerializer(user_message).data,
+        "bot_message": MessageSerializer(bot_message).data
+    }, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

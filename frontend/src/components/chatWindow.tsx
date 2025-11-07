@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getConversation, addMessage, createConversation } from "../api/chatApi";
 import { Conversation, Message } from "../types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatWindowProps {
   conversationId: number | null;
@@ -31,19 +33,12 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
 
   const sendMessage = async () => {
     if (!msg.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now(), 
-      sender: user,
-      content: msg,
-    };
-
-   
+    const userMessage: Message = { id: Date.now(), sender: user, content: msg };
     setMessages((prev) => [...prev, userMessage]);
     setMsg("");
+    setLoading(true);
 
     let conv = conversation;
-
     if (!conversationId) {
       const newConv = await createConversation(msg.slice(0, 40));
       if (onNewConversation) onNewConversation(newConv.id);
@@ -53,23 +48,14 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
 
     if (!conv) return;
 
-    await addMessage(conv.id, { sender: user, content: msg });
+    // ✅ Single API call — backend returns user + bot messages
+    const res = await addMessage(conv.id, { sender: user, content: msg });
 
-    setLoading(true);
-    setTimeout(async () => {
-      const botResponse = "This is a static response from your backend (mock AI 🤖)";
-      const botMessage: Message = {
-        id: Date.now() + 1,
-        sender: "bot",
-        content: botResponse,
-      };
-
-      setMessages((prev) => [...prev, botMessage]);
-
-      await addMessage(conv!.id, { sender: "bot", content: botResponse });
-      setLoading(false);
-    }, 700); 
+    // Update chat instantly
+    setMessages((prev) => [...prev, res.bot_message]);
+    setLoading(false);
   };
+
 
   return (
     <div className="flex flex-col flex-1 bg-gray-50">
@@ -78,11 +64,14 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
           messages.map((m) => (
             <div key={m.id} className={`mb-3 ${m.sender === user ? "text-right" : "text-left"}`}>
               <div
-                className={`inline-block px-3 py-2 rounded-lg ${
-                  m.sender === user ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"
-                }`}
+                className={`inline-block px-3 py-2 rounded-lg ${m.sender === user ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"
+                  }`}
               >
-                {m.content}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                >
+                  {m.content}
+                </ReactMarkdown>
               </div>
             </div>
           ))
@@ -125,11 +114,10 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
         <button
           onClick={sendMessage}
           disabled={!msg.trim() || loading}
-          className={`px-4 rounded text-white transition ${
-            msg.trim() && !loading
+          className={`px-4 rounded text-white transition ${msg.trim() && !loading
               ? "bg-blue-600 hover:bg-blue-700"
               : "bg-gray-400 cursor-not-allowed"
-          }`}
+            }`}
         >
           Send
         </button>
