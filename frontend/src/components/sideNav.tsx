@@ -24,7 +24,7 @@ export default function SideNav({ onSelect, activeId }: SideNavProps) {
       const data = await getConversations();
       setConversations(data);
     } catch (err) {
-      console.error("❌ Failed to load conversations:", err);
+      console.error("Failed to load conversations:", err);
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ export default function SideNav({ onSelect, activeId }: SideNavProps) {
       onSelect(newConv.id);
       setTimeout(loadConversations, 1000);
     } catch (err) {
-      console.error("❌ Failed to create new chat:", err);
+      console.error("Failed to create new chat:", err);
     } finally {
       setCreating(false);
     }
@@ -69,7 +69,7 @@ export default function SideNav({ onSelect, activeId }: SideNavProps) {
       setConversations((prev) => prev.filter((c) => c.id !== id));
       if (id === activeId) onSelect(0);
     } catch (err) {
-      console.error("❌ Failed to delete:", err);
+      console.error("Failed to delete:", err);
     } finally {
       setMenuOpenId(null);
     }
@@ -88,7 +88,7 @@ export default function SideNav({ onSelect, activeId }: SideNavProps) {
       setEditingId(null);
       setMenuOpenId(null);
     } catch (err) {
-      console.error("❌ Failed to rename:", err);
+      console.error("Failed to rename:", err);
     }
   };
 

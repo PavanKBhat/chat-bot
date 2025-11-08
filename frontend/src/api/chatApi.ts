@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // always fetch the latest one
+  const token = localStorage.getItem("token"); 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   } else {

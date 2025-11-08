@@ -63,21 +63,21 @@ def add_message(request, pk):
         conversation.title = short_title
         conversation.save(update_fields=["title"])
 
-    # 🧠 1️⃣ Get current conversation context
+    # Get current conversation context
     current_history = conversation.messages.order_by("-timestamp")[:20]
     current_context = "\n".join([
         f"{'User' if m.sender != 'ai-bot' else 'AI'}: {m.content}"
         for m in current_history
     ])
 
-    # 🧠 2️⃣ Summarize all other past conversations by the same user
+    #Summarize all other past conversations by the same user
     other_convos = Conversation.objects.filter(user=request.user).exclude(id=conversation.id)
     other_messages = Message.objects.filter(conversation__in=other_convos).order_by("-timestamp")[:20]
     other_context = "\n".join([
         f"{'User' if m.sender != 'ai-bot' else 'AI'}: {m.content}"
         for m in other_messages
     ])
-    # 🧩 Combine both
+    # Combine both
     full_prompt = (
         "You are an intelligent AI assistant. "
         "You can remember what the user discussed across multiple conversations.\n\n"
@@ -88,8 +88,8 @@ def add_message(request, pk):
         f"User: {content}\nAI:"
     )
 
-    # 🔮 Call Gemini
-    bot_reply = "⚠️ Unable to generate a response."
+    # Call Gemini
+    bot_reply = "Unable to generate a response."
     try:
         genai.configure(api_key=settings.GEMINI_API_KEY)
 
@@ -102,7 +102,7 @@ def add_message(request, pk):
         bot_reply = (response.text or "").strip() or "🤖 (Empty Gemini response)"
     except Exception as e:
         logging.error(f"Gemini API error: {e}")
-        bot_reply = f"⚠️ Error communicating with Gemini: {e}"
+        bot_reply = f"Error communicating with Gemini: {e}"
 
     # Save AI message
     bot_message = Message.objects.create(

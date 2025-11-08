@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { loginUser, registerUser } from "../api/authApi"; // ✅ added import
+import { loginUser, registerUser } from "../api/authApi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface LoginProps {
@@ -39,7 +39,7 @@ export default function Login({ onLogin }: LoginProps) {
         res = await loginUser({ username, password });
       }
 
-      // ✅ Store safely only if token exists
+      // Store safely only if token exists
       const user = res.user?.username || username;
       if (res.tokens?.access) {
         localStorage.setItem("token", res.tokens.access);

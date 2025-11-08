@@ -49,7 +49,7 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
 
     let conv = conversation;
 
-    // 🧠 If conversation doesn’t exist, create once — not every message
+    //If conversation doesn’t exist, create once — not every message
     if (!conv) {
       const newConv = await createConversation(msg.slice(0, 40));
       setConversation(newConv);
@@ -80,15 +80,15 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
             >
               <div
                 className={`inline-block px-3 py-2 rounded-lg break-words max-w-[85%] overflow-hidden ${m.sender === user
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-800"
                   }`}
               >
                 <div className="overflow-x-auto">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      code({ inline, className, children, ...props }) {
+                      code({ node, inline, className, children, ...props }: any) {
                         return !inline ? (
                           <pre className="overflow-x-auto bg-gray-900 text-white p-3 rounded-md text-sm">
                             <code {...props}>{children}</code>
@@ -106,7 +106,7 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
                 </div>
               </div>
 
-              {/* 🕒 Timestamp below each message */}
+              {/*Timestamp below each message */}
               {m.created_at && (
                 <p
                   className={`text-xs mt-1 text-gray-400 ${m.sender === user ? "text-right pr-1" : "text-left pl-1"
