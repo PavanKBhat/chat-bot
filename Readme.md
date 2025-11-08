@@ -52,11 +52,10 @@ Users can register, log in, and chat with an AI assistant powered by Gemini API,
   
 
 **Architecture diagram**
-<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/c7e922c9-6b43-4d99-996e-b46ee8352219" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/c7e922c9-6b43-4d99-996e-b46ee8352219" />
 
 **Login Setup**
 <img width="960" height="533" alt="image" src="https://github.com/user-attachments/assets/55d43ec6-4f47-43f9-aa3b-e3c5921a91ae" />
-
 <img width="959" height="535" alt="image" src="https://github.com/user-attachments/assets/e6dc7ae5-c8f9-4ccb-bda3-88e18a34075b" />
 
 **Rename and Delete Older Chats**
@@ -68,8 +67,8 @@ Users can register, log in, and chat with an AI assistant powered by Gemini API,
 **Home Page Type your Query**
 <img width="959" height="534" alt="image" src="https://github.com/user-attachments/assets/198b664a-e503-461b-8464-c85feba665c6" />
 
-** Response from Gemini AI bot **
+**Response from Gemini AI bot**
 <img width="958" height="530" alt="image" src="https://github.com/user-attachments/assets/d10c9516-259a-4bbc-9c23-2e398eb1b1e1" />
 
-** Application has context upto past 20 chats**
+**Application has context upto past 20 chats**
 <img width="957" height="532" alt="image" src="https://github.com/user-attachments/assets/3f41c087-cac7-4973-9a5a-b2263f20740f" />
