@@ -49,3 +49,4 @@ Users can register, log in, and chat with an AI assistant powered by Gemini API,
    - npm install
    - npm run dev
    - Frontend will run at: http://localhost:5173/
+<img width="1919" height="1067" alt="image" src="https://github.com/user-attachments/assets/eae42c89-6972-4184-8e17-a756b06b94ae" />
