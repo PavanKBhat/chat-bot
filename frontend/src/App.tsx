@@ -20,7 +20,7 @@ function App() {
     setUser(null);
   };
 
-  if (!user) return <Login onLogin={handleLogin} />;
+  if (!user || !localStorage.getItem('token')) return <Login onLogin={handleLogin} />;
 
   return <ChatLayout user={user} onLogout={handleLogout} onLogin={handleGoToLogin} />;
 }

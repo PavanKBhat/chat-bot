@@ -20,7 +20,7 @@ export default function ChatLayout({ user, onLogout, onLogin }: ChatLayoutProps)
         <ChatWindow
           conversationId={selectedConv}
           user={user}
-          onNewConversation={(id) => setSelectedConv(id)}  // ✅ FIX
+          onNewConversation={(id) => setSelectedConv(id)}
         />
       </div>
     </div>

@@ -60,11 +60,6 @@ export default function Login({ onLogin }: LoginProps) {
     setError("");
   };
 
-  const handleSkip = () => {
-    localStorage.setItem("user", "Guest");
-    onLogin("Guest");
-  };
-
   const handleGoogleLogin = () => {
     alert("Google Sign-In clicked — integrate Firebase or OAuth2 here");
     localStorage.setItem("user", "GoogleUser");
@@ -178,22 +173,7 @@ export default function Login({ onLogin }: LoginProps) {
             <span>Continue with Google</span>
           </button>
         </div>
-
-        {/* Skip / Guest */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <button onClick={handleSkip} className="text-blue-600 hover:underline">
-            Skip login → Start as Guest
-          </button>
-        </div>
       </div>
-
-      {/* Back button */}
-      <button
-        onClick={() => onLogin("Guest")}
-        className="mt-4 text-gray-500 hover:text-blue-600 text-sm"
-      >
-        ← Back
-      </button>
     </div>
   );
 }
