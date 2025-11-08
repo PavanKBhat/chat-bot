@@ -40,32 +40,32 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
 
   // Send message
   const sendMessage = async () => {
-  if (!msg.trim()) return;
+    if (!msg.trim()) return;
 
-  const userMessage: Message = { id: Date.now(), sender: user, content: msg };
-  setMessages((prev) => [...prev, userMessage]);
-  setMsg("");
-  setLoading(true);
+    const userMessage: Message = { id: Date.now(), sender: user, content: msg };
+    setMessages((prev) => [...prev, userMessage]);
+    setMsg("");
+    setLoading(true);
 
-  let conv = conversation;
+    let conv = conversation;
 
-  // 🧠 If conversation doesn’t exist, create once — not every message
-  if (!conv) {
-    const newConv = await createConversation(msg.slice(0, 40));
-    setConversation(newConv);
-    if (onNewConversation) onNewConversation(newConv.id);
-    conv = newConv;
-  }
+    // 🧠 If conversation doesn’t exist, create once — not every message
+    if (!conv) {
+      const newConv = await createConversation(msg.slice(0, 40));
+      setConversation(newConv);
+      if (onNewConversation) onNewConversation(newConv.id);
+      conv = newConv;
+    }
 
-  if (!conv) return;
+    if (!conv) return;
 
-  // Send message to backend
-  const res = await addMessage(conv.id, { sender: user, content: msg });
+    // Send message to backend
+    const res = await addMessage(conv.id, { sender: user, content: msg });
 
-  // Update chat instantly
-  setMessages((prev) => [...prev, res.bot_message]);
-  setLoading(false);
-};
+    // Update chat instantly
+    setMessages((prev) => [...prev, res.bot_message]);
+    setLoading(false);
+  };
 
 
   return (
@@ -88,16 +88,7 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      code({
-                        inline,
-                        className,
-                        children,
-                        ...props
-                      }: {
-                        inline?: boolean;
-                        className?: string;
-                        children?: React.ReactNode;
-                      }) {
+                      code({ inline, className, children, ...props }) {
                         return !inline ? (
                           <pre className="overflow-x-auto bg-gray-900 text-white p-3 rounded-md text-sm">
                             <code {...props}>{children}</code>
@@ -108,14 +99,30 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
                           </code>
                         );
                       },
-
                     }}
                   >
                     {m.content}
                   </ReactMarkdown>
                 </div>
               </div>
+
+              {/* 🕒 Timestamp below each message */}
+              {m.created_at && (
+                <p
+                  className={`text-xs mt-1 text-gray-400 ${m.sender === user ? "text-right pr-1" : "text-left pl-1"
+                    }`}
+                >
+                  {new Date(m.created_at).toLocaleString(undefined, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    day: "2-digit",
+                    month: "short",
+                  })}
+                </p>
+              )}
             </div>
+
           ))
         ) : (
           // Default welcome screen
@@ -168,8 +175,8 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
           onClick={sendMessage}
           disabled={!msg.trim() || loading}
           className={`px-4 rounded text-white transition ${msg.trim() && !loading
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-gray-400 cursor-not-allowed"
+            ? "bg-blue-600 hover:bg-blue-700"
+            : "bg-gray-400 cursor-not-allowed"
             }`}
         >
           Send

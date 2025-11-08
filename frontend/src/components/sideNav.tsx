@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { getConversations, createConversation, deleteConversation, renameConversation } from "../api/chatApi";
 import { Conversation } from "../types";
-
 interface SideNavProps {
   onSelect: (id: number) => void;
   activeId?: number | null;
@@ -177,13 +176,13 @@ export default function SideNav({ onSelect, activeId }: SideNavProps) {
               setNewTitle(conv?.title || "");
             }}
           >
-            ✏️ Rename
+            Rename
           </button>
           <button
             className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
             onClick={() => handleDelete(menuOpenId)}
           >
-            🗑️ Delete
+            Delete
           </button>
         </div>
       )}

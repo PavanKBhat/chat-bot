@@ -24,7 +24,7 @@ export default function TopNav({ user, onLogout, onLogin }: TopNavProps) {
   return (
     <div className="flex justify-between items-center px-6 py-3 bg-white shadow border-b">
       {/* App Title */}
-      <h1 className="text-xl font-bold text-blue-700">AI Chat Portal</h1>
+      <h1 className="text-xl font-bold text-blue-700">AI ChatBot</h1>
 
       {/* Profile Dropdown */}
       <div className="relative" ref={menuRef}>
