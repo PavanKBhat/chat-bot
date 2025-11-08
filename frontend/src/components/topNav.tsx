@@ -72,7 +72,7 @@ export default function TopNav({ user, onLogout, onLogin }: TopNavProps) {
                 <li>
                     <button
                       className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => alert("Settings coming soon!")}
+                      onClick={() => alert("Settings coming soon to handle User preferences!")}
                     >
                       ⚙️ Settings
                     </button>

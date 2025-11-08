@@ -64,7 +64,7 @@ def add_message(request, pk):
         conversation.save(update_fields=["title"])
 
     # 🧠 1️⃣ Get current conversation context
-    current_history = conversation.messages.order_by("timestamp")[:10]
+    current_history = conversation.messages.order_by("-timestamp")[:20]
     current_context = "\n".join([
         f"{'User' if m.sender != 'ai-bot' else 'AI'}: {m.content}"
         for m in current_history
@@ -72,7 +72,7 @@ def add_message(request, pk):
 
     # 🧠 2️⃣ Summarize all other past conversations by the same user
     other_convos = Conversation.objects.filter(user=request.user).exclude(id=conversation.id)
-    other_messages = Message.objects.filter(conversation__in=other_convos).order_by("timestamp")[:20]
+    other_messages = Message.objects.filter(conversation__in=other_convos).order_by("-timestamp")[:20]
     other_context = "\n".join([
         f"{'User' if m.sender != 'ai-bot' else 'AI'}: {m.content}"
         for m in other_messages
