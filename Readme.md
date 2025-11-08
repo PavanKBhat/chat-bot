@@ -52,7 +52,8 @@ Users can register, log in, and chat with an AI assistant powered by Gemini API,
   
 
 **Architecture diagram**
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/c7e922c9-6b43-4d99-996e-b46ee8352219" />
+
+<img width="450" height="450" alt="image" src="https://github.com/user-attachments/assets/c7e922c9-6b43-4d99-996e-b46ee8352219" />
 
 **Login Setup**
 <img width="960" height="533" alt="image" src="https://github.com/user-attachments/assets/55d43ec6-4f47-43f9-aa3b-e3c5921a91ae" />
