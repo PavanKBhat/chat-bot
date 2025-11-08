@@ -49,18 +49,27 @@ Users can register, log in, and chat with an AI assistant powered by Gemini API,
    - npm install
    - npm run dev
    - Frontend will run at: http://localhost:5173/
-<img width="959" height="535" alt="image" src="https://github.com/user-attachments/assets/b77e23b5-57e5-4f7e-86d7-835ae696a387" />
+  
 
+**Architecture diagram**
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/c7e922c9-6b43-4d99-996e-b46ee8352219" />
+
+**Login Setup**
 <img width="960" height="533" alt="image" src="https://github.com/user-attachments/assets/55d43ec6-4f47-43f9-aa3b-e3c5921a91ae" />
 
 <img width="959" height="535" alt="image" src="https://github.com/user-attachments/assets/e6dc7ae5-c8f9-4ccb-bda3-88e18a34075b" />
 
+**Home Page **
 <img width="960" height="534" alt="image" src="https://github.com/user-attachments/assets/c374c0bb-62b3-4127-929f-e7618cdeef8f" />
 
+**Rename and Delete Older Chats**
 <img width="960" height="536" alt="image" src="https://github.com/user-attachments/assets/9296b975-40ab-4418-8a8b-fe47ea81414c" />
 
+**Logout Option**
 <img width="959" height="534" alt="image" src="https://github.com/user-attachments/assets/198b664a-e503-461b-8464-c85feba665c6" />
 
+**Type your Query**
 <img width="958" height="530" alt="image" src="https://github.com/user-attachments/assets/d10c9516-259a-4bbc-9c23-2e398eb1b1e1" />
 
+** Response from Gemini AI bot**
 <img width="957" height="532" alt="image" src="https://github.com/user-attachments/assets/3f41c087-cac7-4973-9a5a-b2263f20740f" />
