@@ -59,17 +59,17 @@ Users can register, log in, and chat with an AI assistant powered by Gemini API,
 
 <img width="959" height="535" alt="image" src="https://github.com/user-attachments/assets/e6dc7ae5-c8f9-4ccb-bda3-88e18a34075b" />
 
-**Home Page **
+**Rename and Delete Older Chats**
 <img width="960" height="534" alt="image" src="https://github.com/user-attachments/assets/c374c0bb-62b3-4127-929f-e7618cdeef8f" />
 
-**Rename and Delete Older Chats**
+**Logout Option** 
 <img width="960" height="536" alt="image" src="https://github.com/user-attachments/assets/9296b975-40ab-4418-8a8b-fe47ea81414c" />
 
-**Logout Option**
+**Home Page Type your Query**
 <img width="959" height="534" alt="image" src="https://github.com/user-attachments/assets/198b664a-e503-461b-8464-c85feba665c6" />
 
-**Type your Query**
+** Response from Gemini AI bot **
 <img width="958" height="530" alt="image" src="https://github.com/user-attachments/assets/d10c9516-259a-4bbc-9c23-2e398eb1b1e1" />
 
-** Response from Gemini AI bot**
+** Application has context upto past 20 chats**
 <img width="957" height="532" alt="image" src="https://github.com/user-attachments/assets/3f41c087-cac7-4973-9a5a-b2263f20740f" />
