@@ -40,30 +40,33 @@ export default function ChatWindow({ conversationId, user, onNewConversation }: 
 
   // Send message
   const sendMessage = async () => {
-    if (!msg.trim()) return;
+  if (!msg.trim()) return;
 
-    const userMessage: Message = { id: Date.now(), sender: user, content: msg };
-    setMessages((prev) => [...prev, userMessage]);
-    setMsg("");
-    setLoading(true);
+  const userMessage: Message = { id: Date.now(), sender: user, content: msg };
+  setMessages((prev) => [...prev, userMessage]);
+  setMsg("");
+  setLoading(true);
 
-    let conv = conversation;
-    if (!conversationId) {
-      const newConv = await createConversation(msg.slice(0, 40));
-      if (onNewConversation) onNewConversation(newConv.id);
-      setConversation(newConv);
-      conv = newConv;
-    }
+  let conv = conversation;
 
-    if (!conv) return;
+  // 🧠 If conversation doesn’t exist, create once — not every message
+  if (!conv) {
+    const newConv = await createConversation(msg.slice(0, 40));
+    setConversation(newConv);
+    if (onNewConversation) onNewConversation(newConv.id);
+    conv = newConv;
+  }
 
-    // Call backend
-    const res = await addMessage(conv.id, { sender: user, content: msg });
+  if (!conv) return;
 
-    // Update chat instantly
-    setMessages((prev) => [...prev, res.bot_message]);
-    setLoading(false);
-  };
+  // Send message to backend
+  const res = await addMessage(conv.id, { sender: user, content: msg });
+
+  // Update chat instantly
+  setMessages((prev) => [...prev, res.bot_message]);
+  setLoading(false);
+};
+
 
   return (
     <div className="flex flex-col flex-1 bg-gray-50 min-w-[700px] max-w-[1000px] overflow-hidden">

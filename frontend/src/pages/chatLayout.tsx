@@ -1,7 +1,8 @@
 import { useState } from "react";
 import TopNav from "../components/topNav";
 import SideNav from "../components/sideNav";
-import ChatWindow from "../components/chatWindow"
+import ChatWindow from "../components/chatWindow";
+
 interface ChatLayoutProps {
   user: string;
   onLogout: () => void;
@@ -13,10 +14,14 @@ export default function ChatLayout({ user, onLogout, onLogin }: ChatLayoutProps)
 
   return (
     <div className="flex flex-col h-screen">
-      <TopNav user={user} onLogout={onLogout} onLogin={onLogin}/>
+      <TopNav user={user} onLogout={onLogout} onLogin={onLogin} />
       <div className="flex flex-1 overflow-hidden">
-        <SideNav onSelect={setSelectedConv} />
-        <ChatWindow conversationId={selectedConv} user={user} />
+        <SideNav onSelect={setSelectedConv} activeId={selectedConv} />
+        <ChatWindow
+          conversationId={selectedConv}
+          user={user}
+          onNewConversation={(id) => setSelectedConv(id)}  // ✅ FIX
+        />
       </div>
     </div>
   );

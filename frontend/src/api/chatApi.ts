@@ -48,3 +48,16 @@ export const addMessage = async (
   const res = await axiosInstance.post(`conversations/${id}/messages/`, message);
   return res.data;
 };
+
+
+export const renameConversation = async (id: number, newTitle: string) => {
+  const res = await axiosInstance.patch(`conversations/${id}/rename/`, {
+    title: newTitle,
+  });
+  return res.data;
+};
+
+export const deleteConversation = async (id: number) => {
+  const res = await axiosInstance.delete(`conversations/${id}/delete/`);
+  return res.data;
+};

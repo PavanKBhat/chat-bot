@@ -130,3 +130,32 @@ def get_conversations(request, pk):
     serializer = ConversationSerializer(conversation)
     return Response(serializer.data)
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def rename_conversation(request, pk):
+    try:
+        conversation = Conversation.objects.get(pk=pk, user=request.user)
+    except Conversation.DoesNotExist:
+        return Response({"error": "Conversation not found"}, status=404)
+
+    new_title = request.data.get("title", "").strip()
+    if not new_title:
+        return Response({"error": "Title cannot be empty"}, status=400)
+
+    conversation.title = new_title
+    conversation.save(update_fields=["title"])
+    return Response({"message": "Conversation renamed successfully", "title": new_title})
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_conversation(request, pk):
+    """
+    Deletes a specific conversation for the logged-in user.
+    """
+    try:
+        conversation = Conversation.objects.get(pk=pk, user=request.user)
+    except Conversation.DoesNotExist:
+        return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    conversation.delete()
+    return Response({"message": "Conversation deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
